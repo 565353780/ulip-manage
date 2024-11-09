@@ -2,12 +2,12 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from models.pointbert.checkpoint import get_missing_parameters_message, get_unexpected_parameters_message
-
 from ulip_manage.Model.PointBERT.group import Group
 from ulip_manage.Model.PointBERT.encoder import Encoder
 from ulip_manage.Model.PointBERT.transformer_encoder import TransformerEncoder
+from ulip_manage.Method.checkpoint import get_missing_parameters_message, get_unexpected_parameters_message
 from ulip_manage.Method.log import print_log
+
 
 class PointTransformer(nn.Module):
     def __init__(self, config, **kwargs):
@@ -50,8 +50,8 @@ class PointTransformer(nn.Module):
 
         self.norm = nn.LayerNorm(self.trans_dim)
         # self.load_model_from_ckpt('/export/home/repos/SLIP/pretrained_models/point_transformer_8192.pt')
-        if not self.args.evaluate_3d:
-            self.load_model_from_ckpt('./data/initialize_models/point_bert_pretrained.pt')
+        # if not self.args.evaluate_3d:
+        #     self.load_model_from_ckpt('./data/initialize_models/point_bert_pretrained.pt')
 
         # self.cls_head_finetune = nn.Sequential(
         #     nn.Linear(self.trans_dim * 2, 256),

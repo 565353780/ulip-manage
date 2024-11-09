@@ -6,7 +6,7 @@ from typing import Union
 from PIL.ImageFile import ImageFile
 
 from ulip_manage.Method.config import cfg_from_yaml_file
-from ulip_manage.Model.PointBERT.point_transformer_colored import PointTransformer_Colored
+from ulip_manage.Model.PointBERT.point_transformer import PointTransformer
 
 
 class ULIP2WithOpenCLIP(nn.Module):
@@ -23,13 +23,13 @@ class ULIP2WithOpenCLIP(nn.Module):
 
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
-        config_addr = './ulip_manage/Config/ULIP_2_PointBERT_10k_colored_pointclouds.yaml'
+        config_addr = './ulip_manage/Config/PointTransformer_8192point.yaml'
         config = cfg_from_yaml_file(config_addr)
-        self.point_encoder = PointTransformer_Colored(config.model, args=args)
+        self.point_encoder = PointTransformer(config.model, args=args)
 
         self.tokenizer = open_clip.get_tokenizer('ViT-bigG-14')
 
-        self.pc_projection = nn.Parameter(torch.empty(pc_feat_dims, 1280))
+        self.pc_projection = nn.Parameter(torch.empty(pc_feat_dims, 512))
         nn.init.normal_(self.pc_projection, std=1280 ** -0.5)
 
     def encode_image(self, image: Union[torch.Tensor, ImageFile]) -> torch.Tensor:
