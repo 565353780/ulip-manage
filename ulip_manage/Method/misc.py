@@ -64,9 +64,11 @@ def fps(data, number):
         data B N 3
         number int
     '''
-    fps_idx = pointnet2_utils.furthest_point_sample(data, number) 
-    fps_data = pointnet2_utils.gather_operation(data.transpose(1, 2).contiguous(), fps_idx).transpose(1,2).contiguous()
-    return fps_data
+    data_device = data.device
+    cuda_data = data.cuda()
+    fps_idx = pointnet2_utils.furthest_point_sample(cuda_data, number) 
+    fps_data = pointnet2_utils.gather_operation(cuda_data.transpose(1, 2).contiguous(), fps_idx).transpose(1,2).contiguous()
+    return fps_data.to(data_device)
 
 def worker_init_fn(worker_id):
     np.random.seed(np.random.get_state()[1][0] + worker_id)

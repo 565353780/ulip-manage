@@ -10,8 +10,11 @@ from ulip_manage.Model.PointBERT.point_transformer import PointTransformer
 
 
 class ULIP2WithOpenCLIP(nn.Module):
-    def __init__(self, args, open_clip_model_file_path: Union[str, None] = None):
+    def __init__(self, args, open_clip_model_file_path: Union[str, None] = None,
+                 device: str = 'cuda:0'):
         super().__init__()
+        self.device = device
+
         pc_feat_dims = 768
 
         print("Get openclip model:")
