@@ -12,19 +12,16 @@ def demo():
     pcd_file_path = '/home/chli/chLi/Dataset/SampledPcd_Manifold/ShapeNet/03001627/46bd3baefe788d166c05d60b45815.npy'
     points_feature = detector.encodePointCloudFile(pcd_file_path)
     print('points_feature:')
-    print(points_feature)
     print(points_feature.shape)
 
     texts = ['an chair', 'a beafutiful chair']
     text_feature = detector.encodeText(texts)
     print('text_feature:')
-    print(text_feature)
     print(text_feature.shape)
 
     image_file_path = '/home/chli/chLi/Dataset/CapturedImage/ShapeNet/03001627/46bd3baefe788d166c05d60b45815/y_5_x_3.png'
     image_feature = detector.encodeImageFile(image_file_path)
     print('image_feature:')
-    print(image_feature)
     print(image_feature.shape)
 
     return True

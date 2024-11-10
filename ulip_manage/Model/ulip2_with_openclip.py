@@ -5,8 +5,8 @@ from torch import nn
 from typing import Union
 from PIL.ImageFile import ImageFile
 
-from ulip_manage.Method.config import cfg_from_yaml_file
 from ulip_manage.Model.PointBERT.point_transformer import PointTransformer
+from ulip_manage.Method.config import cfg_from_yaml_file
 
 
 class ULIP2WithOpenCLIP(nn.Module):
@@ -33,7 +33,8 @@ class ULIP2WithOpenCLIP(nn.Module):
         self.tokenizer = open_clip.get_tokenizer('ViT-bigG-14')
 
         self.pc_projection = nn.Parameter(torch.empty(pc_feat_dims, 512))
-        nn.init.normal_(self.pc_projection, std=1280 ** -0.5)
+        nn.init.normal_(self.pc_projection, std=512 ** -0.5)
+        return
 
     def encode_image(self, image: Union[torch.Tensor, ImageFile]) -> torch.Tensor:
         if isinstance(image, ImageFile):

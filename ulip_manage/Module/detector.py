@@ -9,13 +9,15 @@ from collections import OrderedDict
 
 from utils.tokenizer import SimpleTokenizer
 
+from ulip_manage.Model.ulip_with_image import ULIPWithImage
 from ulip_manage.Model.ulip2_with_openclip import ULIP2WithOpenCLIP
 
 class Detector(object):
     def __init__(self, args, model_file_path: Union[str, None] = None,
                  open_clip_model_file_path: Union[str, None] = None,
                  device: str = 'cuda:0') -> None:
-        self.model = ULIP2WithOpenCLIP(args, open_clip_model_file_path, device)
+        self.model = ULIPWithImage(args, device)
+        #self.model = ULIP2WithOpenCLIP(args, open_clip_model_file_path, device)
         self.device = device
         self.tokenizer = SimpleTokenizer()
 

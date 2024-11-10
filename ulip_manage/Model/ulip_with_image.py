@@ -1,45 +1,64 @@
+import timm
 import torch
 import numpy as np
 from torch import nn
-from easydict import EasyDict
+from typing import Union
+from PIL.ImageFile import ImageFile
+from torchvision.transforms import ToTensor
 
 from ulip_manage.Model.Layer.layer_norm import LayerNorm
 from ulip_manage.Model.transformer import Transformer
+from ulip_manage.Model.PointBERT.point_transformer import PointTransformer
+from ulip_manage.Method.config import cfg_from_yaml_file
 
 
 class ULIPWithImage(nn.Module):
-    def __init__(self, point_encoder, **kwargs):
-        # super().__init__(ssl_mlp_dim, ssl_emb_dim, **kwargs)
+    def __init__(self, args, device: str = 'cuda:0'):
         super().__init__()
-        kwargs = EasyDict(kwargs)
-        self.context_length = kwargs.context_length
-        self.vision_width = kwargs.vision_width
-        self.visual = kwargs.vision_model
+        self.device = device
+
+        embed_dim=512
+        vision_width=768
+        context_length=77
+        vocab_size=49408
+        transformer_width=512
+        transformer_heads=8
+        transformer_layers=12
+        pc_feat_dims=768
+
+        self.context_length = context_length
+        self.vision_width = vision_width
+        self.visual = timm.create_model('vit_base_patch16_224', num_classes=0)
 
         self.transformer = Transformer(
-            width=kwargs.transformer_width,
-            layers=kwargs.transformer_layers,
-            heads=kwargs.transformer_heads,
+            width=transformer_width,
+            layers=transformer_layers,
+            heads=transformer_heads,
             attn_mask=self.build_attention_mask(),
         )
 
-        self.vocab_size = kwargs.vocab_size
-        self.token_embedding = nn.Embedding(kwargs.vocab_size, kwargs.transformer_width)
-        self.positional_embedding = nn.Parameter(torch.empty(self.context_length, kwargs.transformer_width))
-        self.ln_final = LayerNorm(kwargs.transformer_width)
+        self.vocab_size = vocab_size
+        self.token_embedding = nn.Embedding(vocab_size, transformer_width)
+        self.positional_embedding = nn.Parameter(torch.empty(self.context_length, transformer_width))
+        self.ln_final = LayerNorm(transformer_width)
 
-        self.image_projection = nn.Parameter(torch.empty(kwargs.vision_width, kwargs.embed_dim))
-        self.text_projection = nn.Parameter(torch.empty(kwargs.transformer_width, kwargs.embed_dim))
+        self.image_projection = nn.Parameter(torch.empty(vision_width, embed_dim))
+        self.text_projection = nn.Parameter(torch.empty(transformer_width, embed_dim))
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
         self.initialize_parameters()
 
-        self.point_encoder = point_encoder
+        config_addr = './ulip_manage/Config/PointTransformer_8192point.yaml'
+        config = cfg_from_yaml_file(config_addr)
+        self.point_encoder = PointTransformer(config.model, args=args)
 
-        self.pc_projection = nn.Parameter(torch.empty(kwargs.pc_feat_dims, 512))
+        self.pc_projection = nn.Parameter(torch.empty(pc_feat_dims, 512))
         nn.init.normal_(self.pc_projection, std=512 ** -0.5)
 
-    def encode_image(self, image):
+    def encode_image(self, image: Union[torch.Tensor, ImageFile]) -> torch.Tensor:
+        if isinstance(image, ImageFile):
+            image = image.convert('RGB')
+            image = ToTensor()(image).unsqueeze(0)
         x = self.visual(image)
         x = x @ self.image_projection
 
