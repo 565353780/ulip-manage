@@ -58,7 +58,7 @@ class ULIPWithImage(nn.Module):
     def encode_image(self, image: Union[torch.Tensor, ImageFile]) -> torch.Tensor:
         if isinstance(image, ImageFile):
             image = image.convert('RGB')
-            image = ToTensor()(image).unsqueeze(0)
+            image = ToTensor()(image).unsqueeze(0).to(self.device)
         x = self.visual(image)
         x = x @ self.image_projection
 
