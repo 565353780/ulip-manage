@@ -26,7 +26,7 @@ class ULIP2WithOpenCLIP(nn.Module):
 
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
-        config_addr = './ulip_manage/Config/PointTransformer_8192point.yaml'
+        config_addr = '../ulip-manage/ulip_manage/Config/PointTransformer_8192point.yaml'
         config = cfg_from_yaml_file(config_addr)
         self.point_encoder = PointTransformer(config.model, args=args)
 

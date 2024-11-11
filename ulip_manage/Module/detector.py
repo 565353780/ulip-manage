@@ -75,7 +75,10 @@ class Detector(object):
         return image_embedding
 
     @torch.no_grad()
-    def encodePointCloud(self, points: torch.Tensor) -> torch.Tensor:
+    def encodePointCloud(self, points: Union[torch.Tensor, np.ndarray]) -> torch.Tensor:
+        if isinstance(points, np.ndarray):
+            points = torch.from_numpy(points).type(torch.float32).to(self.device).unsqueeze(0)
+
         pc_features = self.model.encode_pc(points)[0]
         pc_features = pc_features / pc_features.norm(dim=-1, keepdim=True)
         return pc_features
@@ -94,5 +97,4 @@ class Detector(object):
             pcd = o3d.io.read_point_cloud(points_file_path)
             points = np.asarray(pcd.points)
 
-        points = torch.from_numpy(points).type(torch.float32).to(self.device).unsqueeze(0)
         return self.encodePointCloud(points)
